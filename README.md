@@ -1,16 +1,34 @@
-# Employee Manager — Server
+![Employee API — the service behind the directory](docs/assets/project-cover.svg)
 
-Spring Boot REST API for an employee directory. It supports creating, listing, updating, deleting, and looking up employees by email.
+<div align="center">
 
-**The complete project now lives in [Employee Manager](https://github.com/KaiAlexander-commits/Employee-Manager-Dashboard), with separate `frontend/` and `backend/` folders and shared setup instructions.** This repository retains the original server source and history.
+**The Java backend behind Employee Manager.**
 
-## Stack
+[Complete project](https://github.com/KaiAlexander-commits/Employee-Manager-Dashboard) · [Controller](src/main/java/com/chambers/employeemgrserver/domain/employee/controllers/EmployeeController.java) · [Run locally](#02--run-the-api)
 
-Java 11, Spring Boot 2.7.1, Spring Data JPA, H2, Lombok, and Maven.
+</div>
 
-## Run this standalone copy
+---
 
-With JDK 11 and Maven installed:
+## 01 / One half of the system
+
+This repository contains the original Spring Boot employee API. The complete application now lives in [Employee-Manager-Dashboard](https://github.com/KaiAlexander-commits/Employee-Manager-Dashboard), with separate `frontend/` and `backend/` folders.
+
+This standalone copy preserves the server's source and history.
+
+| Layer | Technology |
+| --- | --- |
+| Runtime | Java 11 |
+| HTTP | Spring Boot 2.7.1 / Spring Web |
+| Persistence | Spring Data JPA / H2 |
+| Model | Lombok |
+| Build | Maven |
+
+The API supports listing, creating, updating, deleting, and looking up employees by email. Each employee has an `id`, `firstName`, `lastName`, and `email`.
+
+## 02 / Run the API
+
+Install **JDK 11** and **Maven**, then:
 
 ```bash
 git clone https://github.com/KaiAlexander-commits/Employee-Manager-Server.git
@@ -18,30 +36,58 @@ cd Employee-Manager-Server
 mvn spring-boot:run
 ```
 
-The API runs at `http://localhost:8080/api/v1/employees`. H2 uses an in-memory database under the current default configuration; records are temporary and do not survive restarts.
+Base URL: **http://localhost:8080/api/v1/employees**
 
-## Endpoints
+The database uses embedded H2 with the current Spring Boot defaults. No external database setup is required. Records are temporary and do not survive restarts.
 
-Paths are relative to `/api/v1/employees`.
+## 03 / The contract
 
-| Method | Path | Operation |
+Paths below are relative to the base URL.
+
+| Method | Path | Operation | Success response |
+| --- | --- | --- | --- |
+| GET | Base URL | List employees | 200 |
+| POST | Base URL | Create employee | 201 |
+| GET | `/{id}` | Retrieve employee | 200 |
+| PUT | `/{id}` | Update employee | 202 |
+| DELETE | `/{id}` | Delete employee | 204 |
+| GET | `/lookup?email={email}` | Find employee by email | 200 |
+
+```bash
+curl -X POST http://localhost:8080/api/v1/employees \
+  -H "Content-Type: application/json" \
+  -d '{"firstName":"Alex","lastName":"Taylor","email":"alex@example.com"}'
+```
+
+The database generates the employee ID.
+
+## 04 / Trace the request
+
+| Layer | Code | Job |
 | --- | --- | --- |
-| GET | / | List employees |
-| POST | / | Create employee |
-| GET | /{id} | Retrieve employee |
-| PUT | /{id} | Update employee |
-| DELETE | /{id} | Delete employee |
-| GET | /lookup?email={email} | Look up employee by email |
+| Controller | [EmployeeController.java](src/main/java/com/chambers/employeemgrserver/domain/employee/controllers/EmployeeController.java) | Map HTTP requests to employee operations |
+| Service | [EmployeeServiceImpl.java](src/main/java/com/chambers/employeemgrserver/domain/employee/services/EmployeeServiceImpl.java) | Create, retrieve, update, and delete records |
+| Repository | [EmployeeRepository.java](src/main/java/com/chambers/employeemgrserver/domain/employee/repos/EmployeeRepository.java) | Access data through Spring Data |
+| Entity | [Employee.java](src/main/java/com/chambers/employeemgrserver/domain/employee/models/Employee.java) | Define stored employee fields |
+| Browser access | [WebConfig.java](src/main/java/com/chambers/employeemgrserver/domain/employee/controllers/WebConfig.java) | Allow the frontend's local origins |
 
-Create and update requests use JSON fields `firstName`, `lastName`, and `email`. The database generates `id`.
-
-## Development
+## 05 / Development
 
 ```bash
 mvn test
 mvn package
 ```
 
-The existing test checks that the Spring application context loads. CORS permits frontend origins `http://localhost:5174` and `http://localhost:4000`.
+The existing test checks that the application context loads. CORS allows `http://localhost:5174` and `http://localhost:4000`.
 
-This is a learning project without authentication or authorization. Use sample data for local development.
+Application settings live in [application.properties](src/main/resources/application.properties). Authentication and authorization are not implemented; use sample employee data for local development.
+
+---
+
+<div align="center">
+
+**Looking for the dashboard too?**
+
+[Open the combined Employee Manager project →](https://github.com/KaiAlexander-commits/Employee-Manager-Dashboard)
+
+</div>
